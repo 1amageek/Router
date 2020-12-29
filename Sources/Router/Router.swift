@@ -8,7 +8,12 @@
 import SwiftUI
 
 class Controller: ObservableObject {
-    @Published var path: String = "/"
+    
+    @Published var path: String
+
+    init(_ path: String) {
+        self.path = path
+    }
 
     func to(_ path: String) {
         self.path = path
@@ -17,11 +22,12 @@ class Controller: ObservableObject {
 
 public struct Router<Content> : View where Content : View {
 
-    @ObservedObject private var controller: Controller = Controller()
+    @ObservedObject private var controller: Controller
 
     public var content: () -> Content
 
-    public init(@ViewBuilder content: @escaping () -> Content) {
+    public init(_ path: String = "/", @ViewBuilder content: @escaping () -> Content) {
+        self.controller = Controller(path)
         self.content = content
     }
 
@@ -33,7 +39,7 @@ public struct Router<Content> : View where Content : View {
 struct Router_Previews: PreviewProvider {
     static var previews: some View {
         Router {
-            Route("/") {
+            Route("/") { context in
                 List {
                     Link("/foo") {
                         Text("foo")
@@ -44,7 +50,7 @@ struct Router_Previews: PreviewProvider {
                 }
                 .navigationTitle("/")
             }
-            Route("/foo") {
+            Route("/foo") { context in
                 List {
                     Link("/foo") {
                         Text("foo")
@@ -55,7 +61,18 @@ struct Router_Previews: PreviewProvider {
                 }
                 .navigationTitle("/foo")
             }
-            Route("/bar") {
+            Route("/bar") { context in
+                List {
+                    Link("/foo") {
+                        Text("foo")
+                    }
+                    Link("/bar") {
+                        Text("bar")
+                    }
+                }
+                .navigationTitle("/bar")
+            }
+            Route("/user/:uid") { context in
                 List {
                     Link("/foo") {
                         Text("foo")
