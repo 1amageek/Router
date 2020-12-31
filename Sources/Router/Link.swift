@@ -9,20 +9,20 @@ import SwiftUI
 
 public struct Link<Content> : View where Content : View {
 
-    @EnvironmentObject var controller: Controller
+    @Environment(\.routerPath) private var routerPath: Binding<String>
 
     public var to: String
-
+    
     public var content: () -> Content
-
+    
     public init(_ to: String, @ViewBuilder content: @escaping () -> Content) {
         self.to = to
         self.content = content
     }
-
+    
     public var body: some View {
         Button(action: {
-            self.controller.to(self.to)
+            self.routerPath.wrappedValue = self.to
         }) {
             self.content()
         }

@@ -7,32 +7,33 @@
 
 import SwiftUI
 
-class Controller: ObservableObject {
-    
-    @Published var path: String
+public struct RouterKey: EnvironmentKey {
 
-    init(_ path: String) {
-        self.path = path
-    }
+    public static let defaultValue: Binding<String> = .constant("/")
+}
 
-    func to(_ path: String) {
-        self.path = path
+public extension EnvironmentValues {
+
+    var routerPath: Binding<String> {
+        get { self[RouterKey.self] }
+        set { self[RouterKey.self] = newValue }
     }
 }
 
 public struct Router<Content> : View where Content : View {
 
-    @ObservedObject private var controller: Controller
+    @State private var routerPath: String = "/"
 
     public var content: () -> Content
 
     public init(_ path: String = "/", @ViewBuilder content: @escaping () -> Content) {
-        self.controller = Controller(path)
         self.content = content
+        self._routerPath = State(initialValue: path)
     }
 
     public var body: some View {
-        self.content().environmentObject(self.controller)
+        self.content()
+            .environment(\.routerPath, self.$routerPath)
     }
 }
 

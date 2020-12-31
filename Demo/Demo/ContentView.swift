@@ -22,7 +22,6 @@ struct ContentView: View {
     ]
 
     func findUser(uid: String) -> User? {
-        print("WWWW", uid)
         return self.data.filter { $0.id == uid }.first
     }
 
@@ -66,10 +65,36 @@ struct ContentView: View {
                         Text("Back")
                     })
                 }
+                .animation(.easeInOut(duration: 1.0))
+                .transition(.opacity)
             }
         }
     }
 }
+
+//struct ContentView: View {
+//    @State private var showsRectangle: Bool = false
+//
+//    var body: some View {
+//        VStack {
+//            if showsRectangle {
+//                // ここから
+//                Rectangle()
+//                    .frame(width: 100, height: 100)
+//                    .transition(.opacity)
+//                // ここをフォーカス
+//            }
+//
+//            Button(action: {
+//                withAnimation {
+//                    self.showsRectangle.toggle()
+//                }
+//            }) {
+//                Text("Button")
+//            }
+//        }
+//    }
+//}
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {

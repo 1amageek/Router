@@ -102,11 +102,11 @@ public struct Context {
 
 public struct Route<Content> : View where Content : View {
 
-    @EnvironmentObject var controller: Controller
+    @Environment(\.routerPath) private var routerPath: Binding<String>
 
     private var path: String
 
-    private var content:(Context) -> Content
+    private var content: (Context) -> Content
 
     public init(_ path: String, @ViewBuilder content: @escaping (Context) -> Content) {
         self.path = path
@@ -114,11 +114,10 @@ public struct Route<Content> : View where Content : View {
     }
 
     public var body: some View {
-        let context: Context = Context(pattern: self.path, path: self.controller.path)
-        if context.isMatch {
-            return AnyView(self.content(context))
+        if Context(pattern: self.path, path: routerPath.wrappedValue).isMatch {
+            self.content(Context(pattern: self.path, path: routerPath.wrappedValue))
         } else {
-            return AnyView(EmptyView())
+            EmptyView()
         }
     }
 }
