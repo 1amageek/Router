@@ -10,7 +10,7 @@ import Router
 
 struct AView: View {
 
-    @Environment(\.routerPath) private var routerPath: Binding<String>
+    @Environment(\.navigator) private var navigator: Binding<Navigator>
 
     var action: () -> Void
 
@@ -20,14 +20,25 @@ struct AView: View {
 
     var body: some View {
         ZStack {
-            Color.red
-                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height, alignment: .center)
+            Color.green
+            VStack {
+                Text("A").bold()
+                Text("\(navigator.wrappedValue.path)")
+                Button("/b") {
+                    navigator.push {
+                        navigator.wrappedValue.path = "/b"
+                    }
+                }.foregroundColor(.white)
+                Button("/back") {
+                    navigator.pop {
+                        navigator.wrappedValue.path = "/b"
+                    }
+                }.foregroundColor(.white)
 
-            Button("/b") {
-                withAnimation {
-                    routerPath.wrappedValue = "/b"
-                }
-            }.foregroundColor(.white)
+                NavigationLink("Navigation", destination: BView(action: {}))
+                    .foregroundColor(.white)
+            }
+
         }
 
     }
@@ -35,7 +46,7 @@ struct AView: View {
 
 struct BView: View {
 
-    @Environment(\.routerPath) private var routerPath: Binding<String>
+    @Environment(\.navigator) private var navigator: Binding<Navigator>
 
     var action: () -> Void
 
@@ -45,14 +56,26 @@ struct BView: View {
 
     var body: some View {
         ZStack {
-            Color.blue
-                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height, alignment: .center)
+            Color.yellow
+//                .frame(width: UIScreen.main.bounds.width, height: 400, alignment: .center)
 
-            Button("/a") {
-                withAnimation {
-                    routerPath.wrappedValue = "/a"
-                }
-            }.foregroundColor(.white)
+            VStack {
+                Text("B").bold()
+                Text("\(navigator.wrappedValue.path)")
+                Button("/a") {
+                    navigator.push {
+                        navigator.wrappedValue.path = "/a"
+                    }
+                }.foregroundColor(.white)
+                Button("/back") {
+                    navigator.pop {
+                        navigator.wrappedValue.path = "/a"
+                    }
+                }.foregroundColor(.white)
+
+                NavigationLink("Navigation", destination: AView(action: {}))
+                    .foregroundColor(.white)
+            }
         }
 
     }
@@ -66,19 +89,25 @@ struct ContentView: View {
 
         Router("/a") {
             Route("/a") { context in
-                AView {
-                    withAnimation(.easeIn(duration: 1)) {
-                        self.isShow.toggle()
+                NavigationView {
+                    AView {
+                        withAnimation(.easeIn(duration: 1)) {
+                            self.isShow.toggle()
+                        }
                     }
+//                    .navigationTitle("a")
                 }
-            }.transition(.asymmetric(insertion: .slide, removal: .identity))
+            }
             Route("/b") { context in
-                BView {
-                    withAnimation(.easeIn(duration: 1)) {
-                        self.isShow.toggle()
+                NavigationView {
+                    BView {
+                        withAnimation(.easeIn(duration: 1)) {
+                            self.isShow.toggle()
+                        }
                     }
+//                    .navigationTitle("b")
                 }
-            }.transition(.move(edge: .leading))
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ import SwiftUI
 
 public struct Link<Content> : View where Content : View {
 
-    @Environment(\.routerPath) private var routerPath: Binding<String>
+    @Environment(\.navigator) private var navigator: Binding<Navigator>
 
     public var to: String
     
@@ -22,7 +22,9 @@ public struct Link<Content> : View where Content : View {
     
     public var body: some View {
         Button(action: {
-            self.routerPath.wrappedValue = self.to
+            withAnimation(.easeOut(duration: 1)) {
+                self.navigator.wrappedValue = Navigator(to)
+            }
         }) {
             self.content()
         }

@@ -21,20 +21,16 @@ public struct Context {
     public var paramaters: [String: String] { getParamaters(path: path, pattern: pattern) }
 
     public var isMatch: Bool {
-
         if path == pattern {
             return true
         }
-
         guard let matchPath: String = self.matchPath(path: path, pattern: pattern) else {
             return false
         }
-
         if matchPath.split(separator: "/").count == pattern.split(separator: "/").count &&
             matchPath.split(separator: "/").count == path.split(separator: "/").count {
             return true
         }
-
         return false
     }
 
@@ -59,7 +55,6 @@ public struct Context {
             })
         return values.first
     }
-
 
     private func getParamaters(path: String, pattern: String) -> [String: String] {
         let regex: NSRegularExpression = try! NSRegularExpression(pattern: "\\{(\\S+?)\\}", options: [])
@@ -102,7 +97,7 @@ public struct Context {
 
 public struct Route<Content> : View where Content : View {
 
-    @Environment(\.routerPath) private var routerPath: Binding<String>
+    @Environment(\.navigator) private var navigator: Binding<Navigator>
 
     private var path: String
 
@@ -113,12 +108,23 @@ public struct Route<Content> : View where Content : View {
         self.content = content
     }
 
-    public var body: some View {
-        if Context(pattern: self.path, path: routerPath.wrappedValue).isMatch {
-            self.content(Context(pattern: self.path, path: routerPath.wrappedValue))
+    @ViewBuilder
+    var _body: some View {
+        if Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch {
+            self.content(Context(pattern: self.path, path: navigator.wrappedValue.path))
+                .transition(navigator.wrappedValue.transition)
+                .id(navigator.wrappedValue.uuid.uuidString)
+                .zIndex(Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch ? navigator.wrappedValue.zIndex : 0)
+                .onDisappear(perform: {
+                    navigator.wrappedValue.zIndex = 0
+                })
         } else {
             EmptyView()
         }
+    }
+
+    public var body: some View {
+        return _body
     }
 }
 
