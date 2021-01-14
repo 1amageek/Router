@@ -24,7 +24,26 @@ public struct Navigator {
 
 public extension AnyTransition {
 
-    struct NavigationViewModifier: ViewModifier {
+    struct NavigationFrontModifier: ViewModifier {
+        let offset: CGSize
+        public func body(content: Content) -> some View {
+            ZStack {
+                Color(UIColor.systemBackground)
+                content
+            }
+            .clipped()
+            .offset(offset)
+        }
+    }
+
+    static var navigationFront: AnyTransition {
+        AnyTransition.modifier(
+            active: NavigationFrontModifier(offset: CGSize(width: UIScreen.main.bounds.width, height: 0)),
+            identity: NavigationFrontModifier(offset: .zero)
+        )
+    }
+
+    struct NavigationBackModifier: ViewModifier {
         let opacity: Double
         let offset: CGSize
         public func body(content: Content) -> some View {
@@ -36,10 +55,10 @@ public extension AnyTransition {
         }
     }
     
-    static var navigationTransition: AnyTransition {
+    static var navigationBack: AnyTransition {
         AnyTransition.modifier(
-            active: NavigationViewModifier(opacity: 0.15, offset: CGSize(width: -UIScreen.main.bounds.width / 3, height: 0)),
-            identity: NavigationViewModifier(opacity: 0, offset: .zero)
+            active: NavigationBackModifier(opacity: 0.17, offset: CGSize(width: -UIScreen.main.bounds.width / 3, height: 0)),
+            identity: NavigationBackModifier(opacity: 0, offset: .zero)
         )
     }
 }
@@ -47,8 +66,8 @@ public extension AnyTransition {
 public extension Binding where Value == Navigator {
 
     func push<Result>(_ animation: Animation? = .default, _ body: () throws -> Result) rethrows -> Result {
-        let insertion: AnyTransition = .move(edge: .trailing)
-        let removal: AnyTransition = .navigationTransition
+        let insertion: AnyTransition = .navigationFront
+        let removal: AnyTransition = .navigationBack
         let transition: AnyTransition = .asymmetric(insertion: insertion, removal: removal)
         self.wrappedValue.zIndex = 0
         self.wrappedValue.transition = transition
@@ -57,8 +76,8 @@ public extension Binding where Value == Navigator {
     }
 
     func pop<Result>(_ animation: Animation? = .default, _ body: () throws -> Result) rethrows -> Result {
-        let insertion: AnyTransition = .navigationTransition
-        let removal: AnyTransition = .move(edge: .trailing)
+        let insertion: AnyTransition = .navigationBack
+        let removal: AnyTransition = .navigationFront
         let transition: AnyTransition = .asymmetric(insertion: insertion, removal: removal)
         self.wrappedValue.zIndex = 1
         self.wrappedValue.transition = transition

@@ -20,23 +20,24 @@ struct AView: View {
 
     var body: some View {
         ZStack {
-            Color.green
-            VStack {
-                Text("A").bold()
-                Text("\(navigator.wrappedValue.path)")
-                Button("/b") {
+//            Color.green
+            VStack(spacing: 16) {
+                Button("/b push") {
                     navigator.push {
                         navigator.wrappedValue.path = "/b"
                     }
-                }.foregroundColor(.white)
-                Button("/back") {
+                }
+                .font(.system(size: 30, weight: .bold, design: .monospaced))
+                .foregroundColor(.gray)
+
+                Button("/b pop") {
                     navigator.pop {
                         navigator.wrappedValue.path = "/b"
                     }
-                }.foregroundColor(.white)
+                }
+                .font(.system(size: 30, weight: .bold, design: .monospaced))
+                .foregroundColor(.gray)
 
-                NavigationLink("Navigation", destination: BView(action: {}))
-                    .foregroundColor(.white)
             }
 
         }
@@ -56,25 +57,23 @@ struct BView: View {
 
     var body: some View {
         ZStack {
-            Color.yellow
-//                .frame(width: UIScreen.main.bounds.width, height: 400, alignment: .center)
-
-            VStack {
-                Text("B").bold()
-                Text("\(navigator.wrappedValue.path)")
-                Button("/a") {
+//            Color.yellow
+            VStack(spacing: 16) {
+                Button("/a push") {
                     navigator.push {
                         navigator.wrappedValue.path = "/a"
                     }
-                }.foregroundColor(.white)
-                Button("/back") {
+                }
+                .font(.system(size: 30, weight: .bold, design: .monospaced))
+                .foregroundColor(.gray)
+
+                Button("/a pop") {
                     navigator.pop {
                         navigator.wrappedValue.path = "/a"
                     }
-                }.foregroundColor(.white)
-
-                NavigationLink("Navigation", destination: AView(action: {}))
-                    .foregroundColor(.white)
+                }
+                .font(.system(size: 30, weight: .bold, design: .monospaced))
+                .foregroundColor(.gray)
             }
         }
 
@@ -89,23 +88,18 @@ struct ContentView: View {
 
         Router("/a") {
             Route("/a") { context in
-                NavigationView {
-                    AView {
-                        withAnimation(.easeIn(duration: 1)) {
-                            self.isShow.toggle()
-                        }
+                AView {
+                    withAnimation(.easeIn(duration: 1)) {
+                        self.isShow.toggle()
                     }
-//                    .navigationTitle("a")
                 }
+
             }
             Route("/b") { context in
-                NavigationView {
-                    BView {
-                        withAnimation(.easeIn(duration: 1)) {
-                            self.isShow.toggle()
-                        }
+                BView {
+                    withAnimation(.easeIn(duration: 1)) {
+                        self.isShow.toggle()
                     }
-//                    .navigationTitle("b")
                 }
             }
         }
