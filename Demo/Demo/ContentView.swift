@@ -65,7 +65,6 @@ struct ContentView: View {
                         Text("Back")
                     })
                 }
-                .animation(.easeInOut(duration: 1.0))
                 .transition(.opacity)
             }
         }

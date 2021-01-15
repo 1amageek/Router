@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  Route.swift
 //  
 //
 //  Created by nori on 2020/12/28.
@@ -95,6 +95,23 @@ public struct Context {
     }
 }
 
+struct RouteModifier: ViewModifier {
+
+    @Environment(\.navigator) private var navigator: Binding<Navigator>
+
+    let path: String
+
+    func body(content: Self.Content) -> some View {
+        return content
+            .transition(navigator.wrappedValue.transition)
+            .id(navigator.wrappedValue.uuid.uuidString)
+            .zIndex(Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch ? navigator.wrappedValue.zIndex : 0)
+            .onDisappear(perform: {
+                navigator.wrappedValue.zIndex = 0
+            })
+    }
+}
+
 public struct Route<Content> : View where Content : View {
 
     @Environment(\.navigator) private var navigator: Binding<Navigator>
@@ -119,12 +136,7 @@ public struct Route<Content> : View where Content : View {
     var _bodyWithContext: some View {
         if Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch {
             self.contentWithContext(Context(pattern: self.path, path: navigator.wrappedValue.path))
-                .transition(navigator.wrappedValue.transition)
-                .id(navigator.wrappedValue.uuid.uuidString)
-                .zIndex(Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch ? navigator.wrappedValue.zIndex : 0)
-                .onDisappear(perform: {
-                    navigator.wrappedValue.zIndex = 0
-                })
+                .modifier(RouteModifier(path: self.path))
         } else {
             EmptyView()
         }
@@ -134,12 +146,7 @@ public struct Route<Content> : View where Content : View {
     var _body: some View {
         if Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch {
             self.content()
-                .transition(navigator.wrappedValue.transition)
-                .id(navigator.wrappedValue.uuid.uuidString)
-                .zIndex(Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch ? navigator.wrappedValue.zIndex : 0)
-                .onDisappear(perform: {
-                    navigator.wrappedValue.zIndex = 0
-                })
+                .modifier(RouteModifier(path: self.path))
         } else {
             EmptyView()
         }

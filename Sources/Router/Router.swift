@@ -22,13 +22,14 @@ public struct Navigator {
     }
 }
 
-public extension AnyTransition {
+extension AnyTransition {
 
     struct NavigationFrontModifier: ViewModifier {
         let offset: CGSize
-        public func body(content: Content) -> some View {
+        func body(content: Content) -> some View {
             ZStack {
                 Color(UIColor.systemBackground)
+                    .ignoresSafeArea()
                 content
             }
             .offset(offset)
@@ -45,11 +46,13 @@ public extension AnyTransition {
     struct NavigationBackModifier: ViewModifier {
         let opacity: Double
         let offset: CGSize
-        public func body(content: Content) -> some View {
+        func body(content: Content) -> some View {
             ZStack {
                 content
                     .offset(offset)
-                Color.black.opacity(opacity)
+                Color.black
+                    .opacity(opacity)
+                    .ignoresSafeArea()
             }
         }
     }

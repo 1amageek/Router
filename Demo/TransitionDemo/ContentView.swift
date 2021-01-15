@@ -30,7 +30,6 @@ struct ListView: View {
     @EnvironmentObject var dataStore: DataStore
 
     var body: some View {
-
         List {
             Section(header:
                         Text("Weather")
@@ -50,10 +49,56 @@ struct ListView: View {
                     .buttonStyle(PlainButtonStyle())
                 }
             }
+
+            Section {
+                Button(action: {
+                    navigator.pop {
+                        navigator.wrappedValue.path = "/account"
+                    }
+                }) {
+                    Label("Account", systemImage: "person.fill")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                    Spacer()
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
         }
         .listStyle(InsetGroupedListStyle())
+
     }
 }
+
+struct AccountView: View {
+
+    @Environment(\.navigator) private var navigator: Binding<Navigator>
+
+    var body: some View {
+        ZStack {
+            VStack {
+                Image(systemName: "person.fill")
+                    .font(.system(size: 120, weight: .bold, design: .rounded))
+            }
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        navigator.push {
+                            navigator.wrappedValue.path = "/weather"
+                        }
+                    }) {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                .padding()
+                Spacer()
+            }
+            .padding()
+        }
+    }
+}
+
 
 struct DetailView: View {
 
@@ -75,7 +120,7 @@ struct DetailView: View {
                 Text(label)
                     .font(.system(size: 30, weight: .bold, design: .rounded))
             }
-            VStack(alignment: .leading) {
+            VStack {
                 HStack {
                     Button(action: {
                         navigator.pop {
@@ -86,9 +131,9 @@ struct DetailView: View {
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                     }
                     .buttonStyle(PlainButtonStyle())
-
                     Spacer()
                 }
+                .padding()
                 Spacer()
             }
             .padding()
@@ -102,6 +147,9 @@ struct ContentView: View {
 
     var body: some View {
         Router("/weather") {
+            Route("/account") {
+                AccountView()
+            }
             Route("/weather") { 
                 ListView()
             }

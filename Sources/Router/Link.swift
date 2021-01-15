@@ -22,7 +22,7 @@ public struct Link<Content> : View where Content : View {
     
     public var body: some View {
         Button(action: {
-            withAnimation(.easeOut(duration: 1)) {
+            withAnimation {
                 self.navigator.wrappedValue = Navigator(to)
             }
         }) {
