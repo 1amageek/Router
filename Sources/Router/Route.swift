@@ -101,17 +101,39 @@ public struct Route<Content> : View where Content : View {
 
     private var path: String
 
-    private var content: (Context) -> Content
+    private var contentWithContext: ((Context) -> Content)!
+
+    private var content: (() -> Content)!
 
     public init(_ path: String, @ViewBuilder content: @escaping (Context) -> Content) {
+        self.path = path
+        self.contentWithContext = content
+    }
+
+    public init(_ path: String, @ViewBuilder content: @escaping () -> Content) {
         self.path = path
         self.content = content
     }
 
     @ViewBuilder
+    var _bodyWithContext: some View {
+        if Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch {
+            self.contentWithContext(Context(pattern: self.path, path: navigator.wrappedValue.path))
+                .transition(navigator.wrappedValue.transition)
+                .id(navigator.wrappedValue.uuid.uuidString)
+                .zIndex(Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch ? navigator.wrappedValue.zIndex : 0)
+                .onDisappear(perform: {
+                    navigator.wrappedValue.zIndex = 0
+                })
+        } else {
+            EmptyView()
+        }
+    }
+
+    @ViewBuilder
     var _body: some View {
         if Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch {
-            self.content(Context(pattern: self.path, path: navigator.wrappedValue.path))
+            self.content()
                 .transition(navigator.wrappedValue.transition)
                 .id(navigator.wrappedValue.uuid.uuidString)
                 .zIndex(Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch ? navigator.wrappedValue.zIndex : 0)
@@ -124,7 +146,11 @@ public struct Route<Content> : View where Content : View {
     }
 
     public var body: some View {
-        return _body
+        if self.contentWithContext != nil {
+            _bodyWithContext
+        } else {
+            _body
+        }
     }
 }
 

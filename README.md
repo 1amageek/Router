@@ -22,7 +22,7 @@ struct ContentView: View {
 
     var body: some View {
         Router("/weather") {
-            Route("/weather") { context in
+            Route("/weather") { 
                 ListView()
             }
             Route("/weather/{weatherLabel}") { context in
