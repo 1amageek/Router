@@ -5,6 +5,12 @@
 
 Router is a library that assists with SwiftUI view transitions.
 
+## Installation
+
+```swift
+.package(name: "Router", url: "git@github.com:1amageek/Router.git", .upToNextMajor(from: "0.2.0")),
+```
+
 ## Usage
 
 ### Router
