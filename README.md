@@ -1,4 +1,6 @@
 
+![SwiftUI Router](router.png "SwiftUI Router")
+
 # Router
 
 Router is a library that assists with SwiftUI view transitions.
