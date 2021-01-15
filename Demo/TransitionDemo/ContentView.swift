@@ -8,75 +8,91 @@
 import SwiftUI
 import Router
 
-struct AView: View {
+struct Weather {
+    var label: String
+    var title: String
+    var systemImage: String
+}
+
+class DataStore: ObservableObject {
+    var data: [Weather] = [
+        Weather(label: "sunny", title: "Sunny", systemImage: "sun.max"),
+        Weather(label: "cloudy", title: "Cloudy", systemImage: "icloud"),
+        Weather(label: "rainy", title: "Rainy", systemImage: "cloud.rain"),
+        Weather(label: "snow", title: "Snow", systemImage: "snow")
+    ]
+}
+
+struct ListView: View {
 
     @Environment(\.navigator) private var navigator: Binding<Navigator>
 
-    var action: () -> Void
-
-    init(action: @escaping () -> Void) {
-        self.action = action
-    }
+    @EnvironmentObject var dataStore: DataStore
 
     var body: some View {
-        ZStack {
-//            Color.green
-            VStack(spacing: 16) {
-                Button("/b push") {
-                    navigator.push {
-                        navigator.wrappedValue.path = "/b"
-                    }
-                }
-                .font(.system(size: 30, weight: .bold, design: .monospaced))
-                .foregroundColor(.gray)
 
-                Button("/b pop") {
-                    navigator.pop {
-                        navigator.wrappedValue.path = "/b"
+        List {
+            Section(header:
+                        Text("Weather")
+                        .font(.system(size: 24, weight: .black, design: .rounded))
+                        .padding()
+            ) {
+                ForEach(dataStore.data, id: \.label) { data in
+                    Button(action: {
+                        navigator.push {
+                            navigator.wrappedValue.path = "/weather/\(data.label)"
+                        }
+                    }) {
+                        Label(data.title, systemImage: data.systemImage)
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                        Spacer()
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .font(.system(size: 30, weight: .bold, design: .monospaced))
-                .foregroundColor(.gray)
-
             }
-
         }
-
+        .listStyle(InsetGroupedListStyle())
     }
 }
 
-struct BView: View {
+struct DetailView: View {
 
     @Environment(\.navigator) private var navigator: Binding<Navigator>
 
-    var action: () -> Void
+    @EnvironmentObject var dataStore: DataStore
 
-    init(action: @escaping () -> Void) {
-        self.action = action
+    var label: String
+
+    var weather: Weather? {
+        return self.dataStore.data.filter({$0.label == self.label}).first
     }
 
     var body: some View {
         ZStack {
-//            Color.yellow
-            VStack(spacing: 16) {
-                Button("/a push") {
-                    navigator.push {
-                        navigator.wrappedValue.path = "/a"
-                    }
-                }
-                .font(.system(size: 30, weight: .bold, design: .monospaced))
-                .foregroundColor(.gray)
-
-                Button("/a pop") {
-                    navigator.pop {
-                        navigator.wrappedValue.path = "/a"
-                    }
-                }
-                .font(.system(size: 30, weight: .bold, design: .monospaced))
-                .foregroundColor(.gray)
+            VStack(spacing: 10) {
+                Image(systemName: self.weather!.systemImage)
+                    .font(.system(size: 120, weight: .bold, design: .rounded))
+                Text(label)
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
             }
-        }
+            VStack(alignment: .leading) {
+                HStack {
+                    Button(action: {
+                        navigator.pop {
+                            navigator.wrappedValue.path = "/weather"
+                        }
+                    }) {
+                        Image(systemName: "chevron.backward")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                    }
+                    .buttonStyle(PlainButtonStyle())
 
+                    Spacer()
+                }
+                Spacer()
+            }
+            .padding()
+        }
     }
 }
 
@@ -85,24 +101,15 @@ struct ContentView: View {
     @State var isShow: Bool = false
 
     var body: some View {
-
-        Router("/a") {
-            Route("/a") { context in
-                AView {
-                    withAnimation(.easeIn(duration: 1)) {
-                        self.isShow.toggle()
-                    }
-                }
-
+        Router("/weather") {
+            Route("/weather") { context in
+                ListView()
             }
-            Route("/b") { context in
-                BView {
-                    withAnimation(.easeIn(duration: 1)) {
-                        self.isShow.toggle()
-                    }
-                }
+            Route("/weather/{weatherLabel}") { context in
+                DetailView(label: context.paramaters["weatherLabel"]!)
             }
         }
+        .environmentObject(DataStore())
     }
 }
 

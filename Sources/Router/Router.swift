@@ -31,7 +31,6 @@ public extension AnyTransition {
                 Color(UIColor.systemBackground)
                 content
             }
-            .clipped()
             .offset(offset)
         }
     }
