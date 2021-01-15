@@ -1,6 +1,7 @@
 
 # Router
 
+Router is a library that assists with SwiftUI view transitions.
 
 ## Usage
 
