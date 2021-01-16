@@ -30,75 +30,48 @@ struct ListView: View {
     @EnvironmentObject var dataStore: DataStore
 
     var body: some View {
-        List {
-            Section(header:
-                        Text("Weather")
-                        .font(.system(size: 24, weight: .black, design: .rounded))
-                        .padding()
-            ) {
-                ForEach(dataStore.data, id: \.label) { data in
-                    Button(action: {
-                        navigator.push {
-                            navigator.wrappedValue.path = "/weather/\(data.label)"
+        GeometryReader { proxy in
+            ZStack {
+                List {
+                    Section(header:
+                                Text("Weather")
+                                .font(.system(size: 24, weight: .black, design: .rounded))
+                                .padding()
+                    ) {
+                        ForEach(dataStore.data, id: \.label) { data in
+                            Button(action: {
+                                navigator.push {
+                                    navigator.wrappedValue.path = "/weather/\(data.label)"
+                                }
+                            }) {
+                                Label(data.title, systemImage: data.systemImage)
+                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                Spacer()
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                    }) {
-                        Label(data.title, systemImage: data.systemImage)
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
-                        Spacer()
                     }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            }
 
-            Section {
-                Button(action: {
-                    navigator.pop {
-                        navigator.wrappedValue.path = "/account"
-                    }
-                }) {
-                    Label("Account", systemImage: "person.fill")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                    Spacer()
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-        }
-        .listStyle(InsetGroupedListStyle())
-
-    }
-}
-
-struct AccountView: View {
-
-    @Environment(\.navigator) private var navigator: Binding<Navigator>
-
-    var body: some View {
-        ZStack {
-            VStack {
-                Image(systemName: "person.fill")
-                    .font(.system(size: 120, weight: .bold, design: .rounded))
-            }
-            VStack {
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        navigator.push {
-                            navigator.wrappedValue.path = "/weather"
+                    Section {
+                        Button(action: {
+                            navigator.pop {
+                                navigator.wrappedValue.path = "/account"
+                            }
+                        }) {
+                            Label("Account", systemImage: "person.fill")
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                            Spacer()
                         }
-                    }) {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .buttonStyle(PlainButtonStyle())
                     }
-                    .buttonStyle(PlainButtonStyle())
                 }
-                .padding()
-                Spacer()
+                .listStyle(InsetGroupedListStyle())
             }
-            .padding()
+
+
         }
     }
 }
-
 
 struct DetailView: View {
 

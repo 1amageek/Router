@@ -108,6 +108,7 @@ struct RouteModifier: ViewModifier {
             .zIndex(Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch ? navigator.wrappedValue.zIndex : 0)
             .onDisappear(perform: {
                 navigator.wrappedValue.zIndex = 0
+                navigator.wrappedValue.isAnimating = false
             })
     }
 }
@@ -135,8 +136,12 @@ public struct Route<Content> : View where Content : View {
     @ViewBuilder
     var _bodyWithContext: some View {
         if Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch {
-            self.contentWithContext(Context(pattern: self.path, path: navigator.wrappedValue.path))
+            if navigator.wrappedValue.isAnimating {
+                self.contentWithContext(Context(pattern: self.path, path: navigator.wrappedValue.path))
                 .modifier(RouteModifier(path: self.path))
+            } else {
+                self.contentWithContext(Context(pattern: self.path, path: navigator.wrappedValue.path))
+            }
         } else {
             EmptyView()
         }
@@ -145,8 +150,12 @@ public struct Route<Content> : View where Content : View {
     @ViewBuilder
     var _body: some View {
         if Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch {
-            self.content()
+            if navigator.wrappedValue.isAnimating {
+                self.content()
                 .modifier(RouteModifier(path: self.path))
+            } else {
+                self.content()
+            }
         } else {
             EmptyView()
         }

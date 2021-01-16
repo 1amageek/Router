@@ -13,6 +13,8 @@ public struct Navigator {
 
     public var transition: AnyTransition = .identity
 
+    var isAnimating: Bool = false
+
     var zIndex: Double = 0
 
     var uuid: UUID = UUID()
@@ -71,6 +73,7 @@ public extension Binding where Value == Navigator {
         let insertion: AnyTransition = .navigationFront
         let removal: AnyTransition = .navigationBack
         let transition: AnyTransition = .asymmetric(insertion: insertion, removal: removal)
+        self.wrappedValue.isAnimating = true
         self.wrappedValue.zIndex = 0
         self.wrappedValue.transition = transition
         self.wrappedValue.uuid = UUID()
@@ -81,6 +84,7 @@ public extension Binding where Value == Navigator {
         let insertion: AnyTransition = .navigationBack
         let removal: AnyTransition = .navigationFront
         let transition: AnyTransition = .asymmetric(insertion: insertion, removal: removal)
+        self.wrappedValue.isAnimating = true
         self.wrappedValue.zIndex = 1
         self.wrappedValue.transition = transition
         self.wrappedValue.uuid = UUID()
