@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct Context {
+public struct RouteContext {
 
     public var path: String
 
@@ -105,7 +105,7 @@ struct RouteModifier: ViewModifier {
         return content
             .transition(navigator.wrappedValue.transition)
             .id(navigator.wrappedValue.uuid.uuidString)
-            .zIndex(Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch ? navigator.wrappedValue.zIndex : 0)
+            .zIndex(RouteContext(pattern: self.path, path: navigator.wrappedValue.path).isMatch ? navigator.wrappedValue.zIndex : 0)
             .onDisappear(perform: {
                 navigator.wrappedValue.zIndex = 0
                 navigator.wrappedValue.isAnimating = false
@@ -119,11 +119,11 @@ public struct Route<Content> : View where Content : View {
 
     private var path: String
 
-    private var contentWithContext: ((Context) -> Content)!
+    private var contentWithContext: ((RouteContext) -> Content)!
 
     private var content: (() -> Content)!
 
-    public init(_ path: String, @ViewBuilder content: @escaping (Context) -> Content) {
+    public init(_ path: String, @ViewBuilder content: @escaping (RouteContext) -> Content) {
         self.path = path
         self.contentWithContext = content
     }
@@ -135,12 +135,12 @@ public struct Route<Content> : View where Content : View {
 
     @ViewBuilder
     var _bodyWithContext: some View {
-        if Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch {
+        if RouteContext(pattern: self.path, path: navigator.wrappedValue.path).isMatch {
             if navigator.wrappedValue.isAnimating {
-                self.contentWithContext(Context(pattern: self.path, path: navigator.wrappedValue.path))
-                .modifier(RouteModifier(path: self.path))
+                RouteView(content: self.contentWithContext(RouteContext(pattern: self.path, path: navigator.wrappedValue.path)))
+                    .modifier(RouteModifier(path: self.path))
             } else {
-                self.contentWithContext(Context(pattern: self.path, path: navigator.wrappedValue.path))
+                RouteView(content: self.contentWithContext(RouteContext(pattern: self.path, path: navigator.wrappedValue.path)))
             }
         } else {
             EmptyView()
@@ -149,12 +149,12 @@ public struct Route<Content> : View where Content : View {
 
     @ViewBuilder
     var _body: some View {
-        if Context(pattern: self.path, path: navigator.wrappedValue.path).isMatch {
+        if RouteContext(pattern: self.path, path: navigator.wrappedValue.path).isMatch {
             if navigator.wrappedValue.isAnimating {
-                self.content()
-                .modifier(RouteModifier(path: self.path))
+                RouteView(content: self.content())
+                    .modifier(RouteModifier(path: self.path))
             } else {
-                self.content()
+                RouteView(content: self.content())
             }
         } else {
             EmptyView()

@@ -1,99 +1,140 @@
 //
 //  ContentView.swift
-//  Demo
+//  TransitionDemo
 //
-//  Created by nori on 2020/12/28.
+//  Created by nori on 2021/01/01.
 //
 
 import SwiftUI
 import Router
 
-struct ContentView: View {
+struct Weather {
+    var label: String
+    var title: String
+    var systemImage: String
+}
 
-    struct User: Identifiable {
-        var id: String
-        var name: String
-    }
-
-    var data: [User] = [
-        User(id: "000", name: "foo"),
-        User(id: "001", name: "bar"),
-        User(id: "002", name: "baz")
+class DataStore: ObservableObject {
+    var data: [Weather] = [
+        Weather(label: "sunny", title: "Sunny", systemImage: "sun.max"),
+        Weather(label: "cloudy", title: "Cloudy", systemImage: "icloud"),
+        Weather(label: "rainy", title: "Rainy", systemImage: "cloud.rain"),
+        Weather(label: "snow", title: "Snow", systemImage: "snow")
     ]
+}
 
-    func findUser(uid: String) -> User? {
-        return self.data.filter { $0.id == uid }.first
+struct ListView: View {
+
+    @Environment(\.navigator) private var navigator: Binding<Navigator>
+
+    @EnvironmentObject var dataStore: DataStore
+
+    var body: some View {
+        List {
+            Section(header:
+                        Text("Weather")
+                        .font(.system(size: 24, weight: .black, design: .rounded))
+                        .padding()
+            ) {
+                ForEach(dataStore.data, id: \.label) { data in
+                    Button(action: {
+                        navigator.push {
+                            navigator.wrappedValue.path = "/weather/\(data.label)"
+                        }
+                    }) {
+                        Label(data.title, systemImage: data.systemImage)
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                        Spacer()
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+            }
+
+            Section {
+                Button(action: {
+                    navigator.pop {
+                        navigator.wrappedValue.path = "/account"
+                    }
+                }) {
+                    Label("Account", systemImage: "person.fill")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                    Spacer()
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+        .listStyle(InsetGroupedListStyle())
+    }
+}
+
+struct DetailView: View {
+
+    @Environment(\.navigator) private var navigator: Binding<Navigator>
+
+    @EnvironmentObject var dataStore: DataStore
+
+    @State var isShrink: Bool = false
+
+    var label: String
+
+    var weather: Weather? {
+        return self.dataStore.data.filter({$0.label == self.label}).first
     }
 
     var body: some View {
-        Router("/users") {
-            Route("/users") { context in
-                NavigationView {
-                    List(data) { user in
-                        Link("/users/\(user.id)") {
-                            HStack {
-                                Text("\(user.name)").bold()
-                                Spacer()
-                                Text("id: \(user.id)")
-                            }
-                        }
+        ZStack {
+            VStack(spacing: 10) {
+                Image(systemName: self.weather!.systemImage)
+                    .font(.system(size: 120, weight: .bold, design: .rounded))
+                    .scaleEffect(isShrink ? 0.8 : 1.0)
+                    .animation(.spring(response: 0.2, dampingFraction: 0.2, blendDuration: 0.2))
+                    .onTapGesture {
+                        self.isShrink.toggle()
                     }
-                    .navigationTitle("Users")
-                }
+                Text(label)
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
             }
-            Route("/users/{uid}") { context in
-                NavigationView {
-                    VStack {
-                        VStack {
-                            Color.gray
-                                .clipShape(Circle())
-                                .frame(width: 100, height: 100, alignment: .center)
-                            HStack {
-                                Text("ID")
-                                Text(context.paramaters["uid"]!)
-                            }
-
-                            if let user = findUser(uid: context.paramaters["uid"]!) {
-                                Text(user.name).bold()
-                            }
+            VStack {
+                HStack {
+                    Button(action: {
+                        navigator.pop {
+                            navigator.wrappedValue.path = "/weather"
                         }
-                        .padding()
-                        Spacer()
+                    }) {
+                        Image(systemName: "chevron.backward")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
                     }
-                    .navigationTitle("User - \(context.paramaters["uid"] ?? "")")
-                    .navigationBarItems(leading: Link("/users") {
-                        Text("Back")
-                    })
+                    .buttonStyle(PlainButtonStyle())
+                    Spacer()
                 }
-                .transition(.opacity)
+                .padding()
+                Spacer()
             }
+            .padding()
         }
     }
 }
 
-//struct ContentView: View {
-//    @State private var showsRectangle: Bool = false
-//
-//    var body: some View {
-//        VStack {
-//            if showsRectangle {
-//                // ここから
-//                Rectangle()
-//                    .frame(width: 100, height: 100)
-//                    .transition(.opacity)
-//                // ここをフォーカス
-//            }
-//
-//            Button(action: {
-//                withAnimation {
-//                    self.showsRectangle.toggle()
-//                }
-//            }) {
-//                Text("Button")
-//            }
-//        }
-//    }
-//}
+struct ContentView: View {
+
+    @State var isShow: Bool = false
+
+    var body: some View {
+        Router("/weather") {
+            Route("/account") {
+                AccountView()
+            }
+            Route("/weather") {
+                ListView()
+            }
+            Route("/weather/{weatherLabel}") { context in
+                DetailView(label: context.paramaters["weatherLabel"]!)
+            }
+        }
+        .environmentObject(DataStore())
+    }
+}
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
